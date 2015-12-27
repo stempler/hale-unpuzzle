@@ -1,0 +1,42 @@
+apply from: '../unpuzzle/pluginScripts/unpuzzle.plugin'
+
+task wrapper(type: Wrapper) {
+	gradleVersion = '2.10'
+}
+
+unpuzzle {
+
+	localMavenRepositoryDir = file('build/m2')
+
+	unpuzzleDir = file('build/unpuzzle')
+
+	selectedEclipseVersion = '2.9.4'
+
+	eclipseVersion('2.9.4') {
+
+		eclipseMavenGroup = 'hale'
+
+		eclipseMirror = 'http://localhost:8080'
+
+		eclipseArchiveMirror = 'http://localhost:8080'
+
+		sources {
+
+			source "$eclipseMirror/hale_2.9.4.tar.gz"
+			// source "$eclipseMirror/eclipse//eclipse/downloads/drops4/R-4.3.2-201402211700/eclipse-SDK-4.3.2-linux-gtk-x86_64.tar.gz", sourcesOnly: true
+			// source "$eclipseMirror/eclipse//eclipse/downloads/drops4/R-4.3.2-201402211700/eclipse-4.3.2-delta-pack.zip"
+
+			// languagePackTemplate '${eclipseMirror}/eclipse//technology/babel/babel_language_packs/R0.11.1/kepler/BabelLanguagePack-eclipse-${language}_4.3.0.v20131123020001.zip'
+
+			// languagePack 'de'
+			// languagePack 'fr'
+			// languagePack 'es'
+		}
+	}
+
+	// uploadEclipse = [
+	// 	url: 'http://example.com/repository',
+	// 	user: 'someUser',
+	// 	password: 'somePassword'
+	// ]  
+}
