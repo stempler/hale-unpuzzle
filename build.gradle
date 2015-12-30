@@ -1,6 +1,16 @@
-apply plugin: 'eclipse'
+buildscript {
+	repositories {
+		mavenLocal()
+		jcenter()
+	}
+	
+	dependencies {
+		classpath 'org.akhikhl.unpuzzle:unpuzzle-plugin:0.0.23-SNAPSHOT'
+	}
+}
 
-apply from: '../unpuzzle/pluginScripts/unpuzzle.plugin'
+apply plugin: 'eclipse'
+apply plugin: 'org.akhikhl.unpuzzle'
 
 task wrapper(type: Wrapper) {
 	gradleVersion = '2.10'
