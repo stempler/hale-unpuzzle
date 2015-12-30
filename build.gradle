@@ -1,3 +1,5 @@
+apply plugin: 'eclipse'
+
 apply from: '../unpuzzle/pluginScripts/unpuzzle.plugin'
 
 task wrapper(type: Wrapper) {
