@@ -1,12 +1,12 @@
 buildscript {
-	repositories {
-		mavenLocal()
-		jcenter()
-	}
-	
-	dependencies {
-		classpath 'org.akhikhl.unpuzzle:unpuzzle-plugin:0.0.23-SNAPSHOT'
-	}
+  repositories {
+    mavenLocal()
+    jcenter()
+  }
+  
+  dependencies {
+    classpath 'org.akhikhl.unpuzzle:unpuzzle-plugin:0.0.23-SNAPSHOT'
+  }
 }
 
 apply plugin: 'eclipse'
@@ -29,28 +29,28 @@ repositories {
 }
 
 task wrapper(type: Wrapper) {
-	gradleVersion = '2.10'
+  gradleVersion = '2.10'
 }
 
 unpuzzle {
 
-	localMavenRepositoryDir = file('build/m2')
+  localMavenRepositoryDir = file('build/m2')
 
-	unpuzzleDir = file('build/unpuzzle')
+  unpuzzleDir = file('build/unpuzzle')
 
-	selectedEclipseVersion = '2.9.4'
+  selectedEclipseVersion = '2.9.4'
 
-	eclipseVersion('2.9.4') {
-		eclipseMavenGroup = 'eu.esdihumboldt.hale'
-		eclipseMirror = 'http://builds.esdi-humboldt.eu'
-		eclipseArchiveMirror = 'http://builds.esdi-humboldt.eu'
+  eclipseVersion('2.9.4') {
+    eclipseMavenGroup = 'eu.esdihumboldt.hale'
+    eclipseMirror = 'http://builds.esdi-humboldt.eu'
+    eclipseArchiveMirror = 'http://builds.esdi-humboldt.eu'
 
-		sources {
-			source "$eclipseMirror/HALE-2.9.4-linux.gtk.x86_64.tar.gz"
-			
+    sources {
+      source "$eclipseMirror/HALE-2.9.4-linux.gtk.x86_64.tar.gz"
+      
       //TODO add delta pack?
-		}
-	}
+    }
+  }
   
   artifacts {
     
@@ -102,11 +102,11 @@ unpuzzle {
     }
   }
 
-	uploadEclipse = [
-	 	url: 'https://artifactory.wetransform.to/artifactory/private-release-local',
-	 	user: hasProperty('wetfArtifactoryUser') ? wetfArtifactoryUser : '',
-	 	password: hasProperty('wetfArtifactoryPassword') ? wetfArtifactoryPassword : ''
-	]  
+  uploadEclipse = [
+    url: 'https://artifactory.wetransform.to/artifactory/private-release-local',
+    user: hasProperty('wetfArtifactoryUser') ? wetfArtifactoryUser : '',
+    password: hasProperty('wetfArtifactoryPassword') ? wetfArtifactoryPassword : ''
+  ]  
 }
 
 // helper methods
