@@ -141,7 +141,7 @@ String stripBndQualifier(String version) {
   def v = new org.osgi.framework.Version(version)
   def qualifier = v.qualifier
   
-  ['i', 'bnd'].any { prefix ->
+  ['i20', 'bnd-', 'v20'].any { prefix ->
     if (qualifier.startsWith(prefix)) {
       qualifier = null
       return true

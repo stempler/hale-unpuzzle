@@ -13,6 +13,20 @@
             "3.1.1.RELEASE-i20150413": "3.1.1.RELEASE"
         }
     },
+    "com.jcraft.jsch": {
+        "group": "com.jcraft",
+        "name": "jsch",
+        "versions": {
+            "0.1.51.v201410302000": "0.1.51"
+        }
+    },
+    "javax.annotation": {
+        "group": "javax.annotation",
+        "name": "javax.annotation-api",
+        "versions": {
+            "1.2.0.v201401042248": "1.2"
+        }
+    },
     "com.iabcinc.jmep": {
         "group": "com.iabcinc",
         "name": "jmep",
@@ -327,6 +341,13 @@
         "versions": {
             "2.6.0.i20150413": "2.6",
             "2.6.0.v201404270220": "2.6"
+        }
+    },
+    "org.junit": {
+        "group": "junit",
+        "name": "junit",
+        "versions": {
+            "4.11.0.v201303080030": "4.11"
         }
     },
     "com.tinkerpop.blueprints.core": {
