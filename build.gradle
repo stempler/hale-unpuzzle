@@ -12,6 +12,22 @@ buildscript {
 apply plugin: 'eclipse'
 apply plugin: 'org.akhikhl.unpuzzle'
 
+repositories {
+  maven { // HALE artifactory
+    url 'http://artifactory.esdi-humboldt.eu/artifactory/libs-release/'
+  }
+  jcenter()
+  maven {
+      url 'http://download.osgeo.org/webdav/geotools/'
+  }
+  maven {
+      url 'http://download.java.net/maven/2'
+  }
+  maven {
+      url 'http://repo.opengeo.org'
+  }
+}
+
 task wrapper(type: Wrapper) {
 	gradleVersion = '2.10'
 }
@@ -25,38 +41,128 @@ unpuzzle {
 	selectedEclipseVersion = '2.9.4'
 
 	eclipseVersion('2.9.4') {
-
 		eclipseMavenGroup = 'eu.esdihumboldt.hale'
-
-		eclipseMirror = 'http://localhost:8080'
-
-		eclipseArchiveMirror = 'http://localhost:8080'
+		eclipseMirror = 'http://builds.esdi-humboldt.eu'
+		eclipseArchiveMirror = 'http://builds.esdi-humboldt.eu'
 
 		sources {
-			source "$eclipseMirror/hale_2.9.4.tar.gz"
-			// source "$eclipseMirror/eclipse//eclipse/downloads/drops4/R-4.3.2-201402211700/eclipse-SDK-4.3.2-linux-gtk-x86_64.tar.gz", sourcesOnly: true
-			// source "$eclipseMirror/eclipse//eclipse/downloads/drops4/R-4.3.2-201402211700/eclipse-4.3.2-delta-pack.zip"
-
-			// languagePackTemplate '${eclipseMirror}/eclipse//technology/babel/babel_language_packs/R0.11.1/kepler/BabelLanguagePack-eclipse-${language}_4.3.0.v20131123020001.zip'
-
-			// languagePack 'de'
-			// languagePack 'fr'
-			// languagePack 'es'
+			source "$eclipseMirror/HALE-2.9.4-linux.gtk.x86_64.tar.gz"
+			
+      //TODO add delta pack?
 		}
 	}
   
   artifacts {
-    exclude('org.slf4j.api') // duplicate (instead use slf4j.api)
+    
+    //--- duplicates ---
     
     bundle('javax.inject') {
       // instead use javax.inject.javax.inject
       replaceWith 'javax.inject.javax.inject'
     }
+    
+//    exclude('org.slf4j.api')
+    bundle('org.slf4j.api') {
+      // instead use slf4j.api
+      replaceWith 'slf4j.api'
+    }
+    
+    // bundle artifact config example
+//    bundle('slf4j.api') {
+//      artifact {
+//        group = 'org.slf4j'
+//        name = 'slf4j-api'
+//        version = stripQualifier(version)
+//        deploy = false
+//      }
+//    }
+    
+    // turn on verifying all artifacts that are not deployed
+    // (they should be resolvable through the configured repositories)
+    verifyIfNoDeploy = true
+    
+    all {
+      // put Eclipse bundles in separate group
+      if (name.startsWith('org.eclipse')) {
+        group = 'org.eclipse'
+      }
+      
+      //TODO determine Maven Artifact based on bnd-platform information in bundle
+      //XXX for now use bundleArtifactMap instead
+      def bundleArtifactMap = new groovy.json.JsonSlurper().parse(file('bundleArtifactMap.json'))
+      def mapping = bundleArtifactMap[name]
+      
+      if (mapping) {
+        group = mapping.group
+        name = mapping.name
+        def newVersion = project.findArtifactVersion(version, mapping.versions)
+        version = newVersion
+        deploy = false
+      }
+    }
   }
 
 	uploadEclipse = [
 	 	url: 'https://artifactory.wetransform.to/artifactory/private-release-local',
-	 	user: '',
-	 	password: ''
+	 	user: hasProperty('wetfArtifactoryUser') ? wetfArtifactoryUser : '',
+	 	password: hasProperty('wetfArtifactoryPassword') ? wetfArtifactoryPassword : ''
 	]  
+}
+
+// helper methods
+
+def findArtifactVersion(String version, Object versions) {
+  // is there a direct mapping?
+  String result = versions[version]
+  
+  String stripped = stripBndQualifier(version)
+  if (!result) {
+    // is there a mapping with the bnd qualifier excluded?
+    result = versions.findResult { bundleVersion, pomVersion ->
+      String bundleStripped = stripBndQualifier(bundleVersion)
+      if (stripped == bundleStripped) {
+        pomVersion
+      }
+      else {
+        null
+      }
+    }
+  }
+  
+  if (!result) {
+    // fall-back to the stripped version
+    result = stripped
+  }
+  
+  result
+}
+
+String stripBndQualifier(String version) {
+  def v = new org.osgi.framework.Version(version)
+  def qualifier = v.qualifier
+  
+  ['i', 'bnd'].any { prefix ->
+    if (qualifier.startsWith(prefix)) {
+      qualifier = null
+      return true
+    }
+    
+    def inset = '-' + prefix
+    def pos = qualifier.indexOf(inset)
+    if (pos > 0) {
+      qualifier = qualifier.substring(0, pos)
+      return true
+    }
+    
+    return false
+  }
+  
+  def v2 = new org.osgi.framework.Version(v.major, v.minor, v.micro, qualifier)
+  v2.toString()
+}
+
+String stripQualifier(String version) {
+  def v = new org.osgi.framework.Version(version)
+  def noQualifier = new org.osgi.framework.Version(v.major, v.minor, v.micro)
+  noQualifier.toString()
 }
