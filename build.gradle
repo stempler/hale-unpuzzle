@@ -81,12 +81,14 @@ unpuzzle {
     // (they should be resolvable through the configured repositories)
     verifyIfNoDeploy = true
     
+    // artifact configuration applied to all artifacts
     all {
       // put Eclipse bundles in separate group
       if (name.startsWith('org.eclipse')) {
         group = 'org.eclipse'
       }
       
+      // replace some bundles with already available Maven artifacts
       //TODO determine Maven Artifact based on bnd-platform information in bundle
       //XXX for now use bundleArtifactMap instead
       def bundleArtifactMap = new groovy.json.JsonSlurper().parse(file('bundleArtifactMap.json'))
@@ -103,10 +105,10 @@ unpuzzle {
   }
 
   uploadEclipse = [
-    url: 'https://artifactory.wetransform.to/artifactory/private-release-local',
-    user: hasProperty('wetfArtifactoryUser') ? wetfArtifactoryUser : '',
-    password: hasProperty('wetfArtifactoryPassword') ? wetfArtifactoryPassword : ''
-  ]  
+    url: 'https://artifactory.wetransform.to/artifactory/libs-release-local',
+    user: project.hasProperty('wetfArtifactoryUser') ? project.getProperty('wetfArtifactoryUser') : '',
+    password: project.hasProperty('wetfArtifactoryPassword') ? project.getProperty('wetfArtifactoryPassword') : ''
+  ]
 }
 
 // helper methods
