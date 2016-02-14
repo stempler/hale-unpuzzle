@@ -48,7 +48,7 @@ unpuzzle {
     eclipseArchiveMirror = 'http://localhost:8080'
 
     sources {
-      source "$eclipseMirror/eu.esdihumboldt.hale.all.feature.site-2.9.5.201602141311.zip"
+      source "$eclipseMirror/eu.esdihumboldt.hale.all.feature.site-2.9.5.201602141749.zip"
       
       //TODO add delta pack?
     }
@@ -107,12 +107,18 @@ unpuzzle {
         // add "other parts" if bundle was merged with bnd-platform
         otherParts.addAll(project.findOtherMergedParts(pom.manifest));
       }
+      else {
+        // Eclipse-provided or HALE-built bundle
+        
+        // for HALE-built bundles, adapt version number as SNAPSHOT/release
+        version = adaptHaleBundleVersion(version)
+      }
     }
   }
 
   uploadEclipse = [
-    url: isRelease ? 'https://artifactory.wetransform.to/artifactory/libs-release-local' :
-      'https://artifactory.wetransform.to/artifactory/libs-snapshot-local',
+    url: 'https://artifactory.wetransform.to/artifactory/libs-release-local',
+    snapshotUrl: 'https://artifactory.wetransform.to/artifactory/libs-snapshot-local',
     user: project.hasProperty('wetfArtifactoryUser') ? project.getProperty('wetfArtifactoryUser') : '',
     password: project.hasProperty('wetfArtifactoryPassword') ? project.getProperty('wetfArtifactoryPassword') : ''
   ]
@@ -233,4 +239,31 @@ String stripQualifier(String version) {
   def v = new org.osgi.framework.Version(version)
   def noQualifier = new org.osgi.framework.Version(v.major, v.minor, v.micro)
   noQualifier.toString()
+}
+
+/**
+ * Adapt version numbers of HALE bundles for publishing to Maven.
+ */
+String adaptHaleBundleVersion(String version) {
+  def v
+  try {
+    v = new org.osgi.framework.Version(version)
+  } catch (e) {
+    // invalid version encountered
+    return version
+  }
+  def qualifier = v.qualifier
+  
+  if (qualifier == 'SNAPSHOT') {
+    // SNAPSHOT version
+    "${v.major}.${v.minor}.${v.micro}-SNAPSHOT"
+  }
+  else if (qualifier == 'release') {
+    // release version -> omit qualifier
+    "${v.major}.${v.minor}.${v.micro}"
+  }
+  else {
+    // leave version as-is
+    version
+  }
 }
