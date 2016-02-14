@@ -34,19 +34,19 @@ task wrapper(type: Wrapper) {
 
 unpuzzle {
 
-  localMavenRepositoryDir = file('build/m2')
+  // localMavenRepositoryDir = file('build/m2')
 
   unpuzzleDir = file('build/unpuzzle')
 
-  selectedEclipseVersion = '2.9.4'
+  selectedEclipseVersion = '2.9.5'
 
-  eclipseVersion('2.9.4') {
-    eclipseMavenGroup = 'eu.esdihumboldt.hale'
-    eclipseMirror = 'http://builds.esdi-humboldt.eu'
-    eclipseArchiveMirror = 'http://builds.esdi-humboldt.eu'
+  eclipseVersion('2.9.5') {
+    eclipseMavenGroup = 'exp.eu.esdihumboldt.hale'
+    eclipseMirror = 'http://localhost:8080'
+    eclipseArchiveMirror = 'http://localhost:8080'
 
     sources {
-      source "$eclipseMirror/HALE-2.9.4-linux.gtk.x86_64.tar.gz"
+      source "$eclipseMirror/eu.esdihumboldt.hale.all.feature.site-2.9.5.201602141228.zip"
       
       //TODO add delta pack?
     }
@@ -85,20 +85,31 @@ unpuzzle {
     all {
       // put Eclipse bundles in separate group
       if (name.startsWith('org.eclipse')) {
-        group = 'org.eclipse'
+        group = 'exp.org.eclipse'
       }
       
       // replace some bundles with already available Maven artifacts
-      //TODO determine Maven Artifact based on bnd-platform information in bundle
-      //XXX for now use bundleArtifactMap instead
-      def bundleArtifactMap = new groovy.json.JsonSlurper().parse(file('bundleArtifactMap.json'))
-      def mapping = bundleArtifactMap[name]
+      def mapping
+      
+      // determine Maven Artifact based on bnd-platform information in bundle
+      mapping = project.findBndPlatformArtifactMapping(pom.manifest)
+      
+      // use bundleArtifactMap as fall-back
+      if (!mapping) {
+        def bundleArtifactMap = new groovy.json.JsonSlurper().parse(file('bundleArtifactMap.json'))
+        mapping = bundleArtifactMap[name]
+      }
       
       if (mapping) {
         group = mapping.group
         name = mapping.name
-        def newVersion = project.findArtifactVersion(version, mapping.versions)
-        version = newVersion
+        if (mapping.version) {
+          version = mapping.version
+        }
+        else {
+          def newVersion = project.findArtifactVersion(version, mapping.versions)
+          version = newVersion
+        }
         deploy = false
       }
     }
@@ -112,6 +123,19 @@ unpuzzle {
 }
 
 // helper methods
+
+def findBndPlatformArtifactMapping(java.util.jar.Manifest manifest) {
+  def group = manifest?.attr?.getValue("BndPlatform-ArtifactGroup")
+  def name = manifest?.attr?.getValue("BndPlatform-ArtifactName")
+  def version = manifest?.attr?.getValue("BndPlatform-ArtifactVersion")
+  
+  if (name && group && version) {
+    [name: name, group: group, version: version]
+  }
+  else {
+    null
+  }
+}
 
 def findArtifactVersion(String version, Object versions) {
   // is there a direct mapping?

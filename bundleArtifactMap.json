@@ -701,10 +701,9 @@
         }
     },
     "javassist": {
-        "group": "javassist",
+        "group": "org.javassist",
         "name": "javassist",
         "versions": {
-            "3.12.1.GA-i20150413": "3.12.1.GA",
             "3.18.1.GA-i201504131601": "3.18.1-GA"
         }
     },
