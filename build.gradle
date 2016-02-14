@@ -39,6 +39,8 @@ unpuzzle {
   unpuzzleDir = file('build/unpuzzle')
 
   selectedEclipseVersion = '2.9.5'
+  
+  def isRelease = false
 
   eclipseVersion('2.9.5') {
     eclipseMavenGroup = 'eu.esdihumboldt.unpuzzled' // default group
@@ -109,7 +111,8 @@ unpuzzle {
   }
 
   uploadEclipse = [
-    url: 'https://artifactory.wetransform.to/artifactory/libs-release-local',
+    url: isRelease ? 'https://artifactory.wetransform.to/artifactory/libs-release-local' :
+      'https://artifactory.wetransform.to/artifactory/libs-snapshot-local',
     user: project.hasProperty('wetfArtifactoryUser') ? project.getProperty('wetfArtifactoryUser') : '',
     password: project.hasProperty('wetfArtifactoryPassword') ? project.getProperty('wetfArtifactoryPassword') : ''
   ]
